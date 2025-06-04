@@ -1,14 +1,19 @@
 using UnityEngine;
+using TMPro;
 
 public class WaveSpawning : MonoBehaviour
 {
+    private int count;
+
     void Start()
     {
-        InvokeRepeating("MyMethod", 0f, 3f); // Start after 1s, repeat every 2s
+        count = 0;
+        InvokeRepeating("MyMethod", 0f, 3f);
     }
 
     void MyMethod()
     {
-        Debug.Log("Method called periodically");
+        count++;
+        GameObject.Find("WaveCounter").GetComponent<TMP_Text>().text = "Wave " + count;
     }
 }
