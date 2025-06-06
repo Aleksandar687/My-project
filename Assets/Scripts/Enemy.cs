@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy
+public class Enemy : MonoBehaviour
 {
     private float health;
     private float maxHealth;
@@ -8,6 +8,23 @@ public class Enemy
     private float walkspeed;
     private short resistance;
     private bool active;
+    private bool isMoving = true;
+
+    private void Update()
+    {
+        if (isMoving)
+            transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("collided");
+        if (collision.gameObject.CompareTag("collide"))
+        {
+            isMoving = false;
+            
+        }
+    }
 
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
@@ -17,7 +34,7 @@ public class Enemy
         health = 100;
         maxHealth = 100;
         damage = 5;
-        walkspeed = 1;
+        walkspeed = 0.5f;
         resistance = 0;
         active = true;
     }

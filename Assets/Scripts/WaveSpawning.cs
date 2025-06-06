@@ -4,25 +4,33 @@ using System.Collections.Generic;
 
 public class WaveSpawning : MonoBehaviour
 {
-    private static int count = 0;
-    private static List<GameObject> enemies = new();
-    public GameObject objectToClone;
-    public Vector3 offset = new Vector3(1f, 0f, 0f);
+    private int count = 0;
+    private List<bool[]> variants = new List<bool[]>{
+        new bool[] { true, false, true, false, true },
+        new bool[] { false, true, true, true, false },
+        new bool[] { false, true, false, true, false },
+        new bool[] { false, false, true, false, false }
+    };
+    public GameObject enemyC;
+    public GameObject label;
 
     void Start()
     {
-        InvokeRepeating("MyMethod", 0f, 3f);
+        InvokeRepeating("SpawnWave", 0, 4);
     }
 
-    void MyMethod()
+    void SpawnWave()
     {
         count++;
-        GameObject.Find("WaveCounter").GetComponent<TMP_Text>().text = "Wave " + count;
-        GameObject clone = Instantiate(objectToClone);
-        clone.transform.position = objectToClone.transform.position;
-        clone.name = objectToClone.name + "_Clone";
-        enemies.Add(clone);
-        foreach (var e in enemies)
-            e.transform.position += offset;
+        label.GetComponent<TMP_Text>().text = "Wave " + count;
+        bool[] temp = variants[(int)Mathf.Floor(Random.Range(0, 4))];
+        for (int i = 0; i < 5; i++)
+            if (temp[i])
+            {
+                GameObject instance = Instantiate(enemyC);
+                instance.transform.position = new Vector3(8, 1.26f, 0 - i);
+                instance.name = "Zombie";
+                Enemy enemyScript = instance.AddComponent<Enemy>();
+            }
     }
 }
