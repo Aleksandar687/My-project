@@ -16,10 +16,9 @@ public class Enemy : MonoBehaviour
             transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collider)
     {
-        Debug.Log("collided");
-        if (collision.gameObject.CompareTag("Tower"))
+        if (collider.gameObject.CompareTag("Tower"))
         {
             isMoving = false;
         }
