@@ -16,13 +16,12 @@ public class Enemy : MonoBehaviour
             transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         Debug.Log("collided");
-        if (collision.gameObject.CompareTag("collide"))
+        if (collision.gameObject.CompareTag("Tower"))
         {
             isMoving = false;
-            
         }
     }
 
@@ -34,7 +33,7 @@ public class Enemy : MonoBehaviour
         health = 100;
         maxHealth = 100;
         damage = 5;
-        walkspeed = 0.5f;
+        walkspeed = 1f;
         resistance = 0;
         active = true;
     }
