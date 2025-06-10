@@ -23,7 +23,7 @@ public class WaveSpawning : MonoBehaviour
     {
         count++;
         label.GetComponent<TMP_Text>().text = "Wave " + count;
-        bool[] temp = variants[0]; //variants[(int)Mathf.Floor(Random.Range(0, 4))];
+        bool[] temp = variants[(int)Mathf.Floor(Random.Range(0, 4))];
         for (int i = 0; i < 5; i++)
             if (temp[i])
             {

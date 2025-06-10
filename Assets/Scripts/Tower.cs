@@ -1,24 +1,34 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Tower : MonoBehaviour
 {
-    public GameObject tower;
     private float health;
     private float maxHealth;
     private float damage;
     private float attackSpeed;
-    private float range = 5f;
+    private float range;
     private short resistance;
     private List<string> qualities;
     private bool active;
+    private GameObject target;
+    private Coroutine shootRoutine;
+    private bool shooting = false;
 
-    /*rotation  */
-    public float rotationSpeed = 10f;
-    public List<Transform> targetsInRange = new();
-    
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
+
+    public Tower()
+    {
+        health = 100;
+        maxHealth = 100;
+        damage = 40;
+        attackSpeed = 0.7f;
+        range = 5;
+        resistance = 0;
+        active = true;
+    }
 
     public void DealDamage(Enemy enemy)
     {
@@ -35,38 +45,58 @@ public class Tower : MonoBehaviour
     
     public void Update()
     {
-        FindTargets();
-        RotateTowardsTarget();
-    }
-    private void FindTargets()
-    {
-      
-        targetsInRange.Clear();
-        Collider[] colliders = Physics.OverlapSphere(transform.position, range);
-        
-        foreach (Collider col in colliders)
+        FindTarget();
+        if (target is not null)
         {
-            if (col.CompareTag("Enemy"))
+            RotateTowardsTarget();
+            if (!shooting)
             {
-                targetsInRange.Add(col.transform);
+                shooting = true;
+                shootRoutine = StartCoroutine(RepeatShoot());
             }
+        }
+        else if (shooting)
+        {
+            shooting = false;
+            StopCoroutine(shootRoutine);
         }
     }
 
-     private void RotateTowardsTarget()
-     {
-        if (targetsInRange.Count > 0)
+    private IEnumerator<WaitForSeconds> RepeatShoot()
+    {
+        DealDamage(target.GetComponent<Enemy>());
+        while (true)
         {
-            Transform target = targetsInRange[0];
-            Vector3 direction = target.position - tower.transform.position;
-            direction.y = 0;
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            tower.transform.rotation = Quaternion.Slerp(
-                tower.transform.rotation,
-                lookRotation,
-                Time.deltaTime * rotationSpeed
-            );
+            yield return new WaitForSeconds(attackSpeed);
+            DealDamage(target.GetComponent<Enemy>());
         }
-     }
+    }
+
+    private void FindTarget()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, range);
+        foreach (Collider col in colliders.OrderBy(x => x.gameObject.transform.position.x))
+            if (col.CompareTag("Enemy"))
+            {
+                target = col.gameObject;
+                return;
+            }
+        target = null;
+    }
+
+    private void RotateTowardsTarget()
+    {
+        Transform top = transform;
+        foreach (Transform i in transform)
+            if (i.gameObject.name == "Top")
+            {
+                top = i;
+                break;
+            }
+        Vector3 direction = target.transform.position - top.position;
+        direction.y = 0;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        top.rotation = Quaternion.Slerp(top.rotation, lookRotation, Time.deltaTime * 10);
+    }
     
 }

@@ -13,5 +13,6 @@ public class UIManager : MonoBehaviour
     public void HandleClick()
     {
         Debug.Log("Button clicked!");
+        
     }
 }

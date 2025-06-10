@@ -14,6 +14,9 @@ public class Enemy : MonoBehaviour
     {
         if (isMoving)
             transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
+        else Death();
+        if (transform.position.x < 0)
+            Death();
     }
 
     void OnTriggerEnter(Collider collider)
@@ -32,7 +35,7 @@ public class Enemy : MonoBehaviour
         health = 100;
         maxHealth = 100;
         damage = 5;
-        walkspeed = 1f;
+        walkspeed = 0.5f;
         resistance = 0;
         active = true;
     }
@@ -47,6 +50,12 @@ public class Enemy : MonoBehaviour
 
     public void Death()
     {
-        active = false;
+        foreach (var i in gameObject.scene.GetRootGameObjects())
+            if (i.name == "EventSystem")
+            {
+                i.GetComponent<Money>().UpdateMoney(15);
+                break;
+            }
+        Destroy(this.gameObject);
     }
 }
