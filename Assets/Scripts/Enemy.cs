@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class Enemy : MonoBehaviour
 {
@@ -9,6 +10,13 @@ public class Enemy : MonoBehaviour
     private short resistance;
     private bool active;
     private bool isMoving = true;
+    private GameObject canvas;
+
+    private void Start()
+    {
+        canvas = transform.Find("Canvas").gameObject;
+        canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
+    }
 
     private void Update()
     {
@@ -17,6 +25,17 @@ public class Enemy : MonoBehaviour
         else Death();
         if (transform.position.x < 0)
             Death();
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+            if (hit.collider.gameObject == gameObject)
+            {
+                canvas.gameObject.SetActive(true);
+                canvas.transform.LookAt(Camera.main.transform);
+                canvas.transform.rotation = Quaternion.Euler(0f, canvas.transform.rotation.eulerAngles.y + 180f, 0f);
+                return;
+            }
+        canvas.gameObject.SetActive(false);
     }
 
     void OnTriggerEnter(Collider collider)
@@ -46,7 +65,11 @@ public class Enemy : MonoBehaviour
         else tower.TakeDamage(damage);
     }
 
-    public void TakeDamage(float dmg) => health -= dmg * Resistance;
+    public void TakeDamage(float dmg)
+    {
+        health -= dmg * Resistance;
+        canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
+    }
 
     public void Death()
     {
