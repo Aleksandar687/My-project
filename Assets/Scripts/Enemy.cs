@@ -39,6 +39,13 @@ public class Enemy : MonoBehaviour
     {
         if (isMoving)
             transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
+        else if (target is null)
+        {
+            StopCoroutine(attackRoutine);
+            target = null;
+            isMoving = true;
+        }
+
         if (transform.position.x < 0)
             Death();
 
@@ -61,22 +68,22 @@ public class Enemy : MonoBehaviour
         DealDamage(t);
         while (true)
         {
-            if (target is null)
-            {
-                isMoving = true;
-                StopCoroutine(attackRoutine);
-            }
             yield return new WaitForSeconds(1);
             try
             { DealDamage(t); }
             catch (MissingReferenceException)
-            { }
+            {
+                StopCoroutine(attackRoutine);
+                target = null;
+                isMoving = true;
+                break;
+            }
         }
     }
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider.gameObject.CompareTag("Tower"))
+        if (collider.gameObject.CompareTag("Tower") && isMoving)
         {
             isMoving = false;
             target = collider.gameObject;

@@ -128,5 +128,4 @@ public class Tower : MonoBehaviour
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         top.rotation = Quaternion.Slerp(top.rotation, lookRotation, Time.deltaTime * 10);
     }
-    
 }
