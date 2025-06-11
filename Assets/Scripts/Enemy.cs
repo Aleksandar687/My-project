@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 public class Enemy : MonoBehaviour
 {
@@ -10,7 +11,23 @@ public class Enemy : MonoBehaviour
     private short resistance;
     private bool active;
     private bool isMoving = true;
+    private Coroutine attackRoutine;
+    private GameObject target = null;
     private GameObject canvas;
+
+    public float Health { get => health; }
+    public float Resistance { get => 1 - (float)resistance / 100; }
+    public GameObject Target { set => target = value; }
+
+    public Enemy()
+    {
+        health = 100;
+        maxHealth = 100;
+        damage = 5;
+        walkspeed = 2f;
+        resistance = 0;
+        active = true;
+    }
 
     private void Start()
     {
@@ -22,9 +39,9 @@ public class Enemy : MonoBehaviour
     {
         if (isMoving)
             transform.position += new Vector3(-1, 0, 0) * walkspeed * Time.deltaTime;
-        else Death();
         if (transform.position.x < 0)
             Death();
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
@@ -38,25 +55,33 @@ public class Enemy : MonoBehaviour
         canvas.gameObject.SetActive(false);
     }
 
+    private IEnumerator<WaitForSeconds> RepeatAttack()
+    {
+        Tower t = target.GetComponent<Tower>();
+        DealDamage(t);
+        while (true)
+        {
+            if (target is null)
+            {
+                isMoving = true;
+                StopCoroutine(attackRoutine);
+            }
+            yield return new WaitForSeconds(1);
+            try
+            { DealDamage(t); }
+            catch (MissingReferenceException)
+            { }
+        }
+    }
+
     void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.CompareTag("Tower"))
         {
             isMoving = false;
+            target = collider.gameObject;
+            attackRoutine = StartCoroutine(RepeatAttack());
         }
-    }
-
-    public float Health { get => health; }
-    public float Resistance { get => 1 - (float)resistance / 100; }
-
-    public Enemy()
-    {
-        health = 100;
-        maxHealth = 100;
-        damage = 5;
-        walkspeed = 0.5f;
-        resistance = 0;
-        active = true;
     }
 
     public void DealDamage(Tower tower)
@@ -79,6 +104,6 @@ public class Enemy : MonoBehaviour
                 i.GetComponent<Money>().UpdateMoney(15);
                 break;
             }
-        Destroy(this.gameObject);
+        Destroy(gameObject);
     }
 }
