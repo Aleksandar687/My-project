@@ -13,6 +13,8 @@ public class Enemy : MonoBehaviour
     private Coroutine attackRoutine;
     private GameObject target = null;
     private GameObject canvas;
+     public GameObject bubblePrefab; 
+    public int bubbleCount = 10;
 
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
@@ -115,5 +117,11 @@ public class Enemy : MonoBehaviour
     {
         WaveSpawning.m.UpdateMoney(15);
         Destroy(gameObject);
+         for (int i = 0; i < bubbleCount; i++)
+        {
+            // Spawn each bubble at a slightly random position around the zombie
+            Vector3 randomOffset = Random.insideUnitSphere * 2f;
+            Instantiate(bubblePrefab, transform.position + randomOffset, Quaternion.identity);
+        }
     }
 }
