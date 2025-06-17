@@ -3,15 +3,15 @@ using TMPro;
 
 public class Money : MonoBehaviour
 {
-    private int m = 100;
+    public int cash = 100;
     public TMP_Text mText;
 
     public bool UpdateMoney(int amount)
     {
-        if (-amount > m)
+        if (-amount > cash)
             return false;
-        m += amount;
-        mText.text = "$" + m;
+        cash += amount;
+        mText.text = "$" + cash;
         return true;
     }
 }

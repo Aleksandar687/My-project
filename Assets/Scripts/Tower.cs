@@ -12,24 +12,23 @@ public class Tower : MonoBehaviour
     private float range;
     private short resistance;
     private List<string> qualities;
-    private bool active;
     private GameObject target;
     private Coroutine shootRoutine;
     private bool shooting = false;
     private GameObject canvas;
+    private GameObject tempBullet;
 
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
 
     public Tower()
     {
-        health = 100;
-        maxHealth = 100;
-        damage = 10;
+        health = 10;
+        maxHealth = 10;
+        damage = 4;
         attackSpeed = 0.7f;
-        range = 5;
+        range = 3;
         resistance = 0;
-        active = true;
     }
 
     private void Start()
@@ -68,35 +67,69 @@ public class Tower : MonoBehaviour
         canvas.gameObject.SetActive(false);
     }
 
-    private IEnumerator<WaitForSeconds> RepeatShoot()
+    private System.Collections.IEnumerator RepeatShoot()
     {
-        DealDamage(target.GetComponent<Enemy>());
+        Enemy enemy = target.GetComponent<Enemy>();
+        try
+        {
+            enemy.TakeDamage(damage);
+            tempBullet = Instantiate(gameObject.transform.Find("Top").Find("Bullet").gameObject);
+            tempBullet.transform.position = gameObject.transform.Find("Top").Find("Bullet").position;
+            StartCoroutine(MoveBullet());
+
+        }
+        catch (MissingReferenceException)
+        {
+            StopCoroutine(shootRoutine);
+            shooting = false;
+        }
         while (true)
         {
             yield return new WaitForSeconds(attackSpeed);
-            DealDamage(target.GetComponent<Enemy>());
+            try
+            {
+                enemy.TakeDamage(damage);
+                tempBullet = Instantiate(gameObject.transform.Find("Top").Find("Bullet").gameObject);
+                tempBullet.transform.position = gameObject.transform.Find("Top").Find("Bullet").position;
+                StartCoroutine(MoveBullet());
+            }
+            catch (MissingReferenceException)
+            {
+                StopCoroutine(shootRoutine);
+                shooting = false;
+                break;
+            }
         }
     }
 
-    public void DealDamage(Enemy enemy)
+    System.Collections.IEnumerator MoveBullet()
     {
-        if (damage * enemy.Resistance >= enemy.Health) enemy.Death();
-        else enemy.TakeDamage(damage);
+        Vector3 p = target.transform.position;
+        while (Vector3.Distance(tempBullet.transform.position, p) > 0.1f)
+        {
+            tempBullet.transform.position = Vector3.MoveTowards(tempBullet.transform.position, p, 50 * Time.deltaTime);
+            yield return null;
+        }
+        Destroy(tempBullet);
     }
 
     public void TakeDamage(float dmg)
     {
+        if (dmg * Resistance >= health)
+        {
+            Death();
+            return;
+        }
         health -= dmg * Resistance;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
     }
 
     public void Death()
     {
+        WaveSpawning.m.UpdateMoney(50);
         foreach (var i in gameObject.scene.GetRootGameObjects())
         {
-            if (i.name == "EventSystem")
-                i.GetComponent<Money>().UpdateMoney(50);
-            if (i.name == "Zombie")
+            if (i.name == "Zombie" && i.transform.position.z == transform.position.z)
                 i.GetComponent<Enemy>().Target = null;
         }
         Destroy(gameObject);

@@ -9,7 +9,6 @@ public class Enemy : MonoBehaviour
     private float damage;
     private float walkspeed;
     private short resistance;
-    private bool active;
     private bool isMoving = true;
     private Coroutine attackRoutine;
     private GameObject target = null;
@@ -21,12 +20,11 @@ public class Enemy : MonoBehaviour
 
     public Enemy()
     {
-        health = 100;
-        maxHealth = 100;
-        damage = 5;
-        walkspeed = 2f;
+        health = 10;
+        maxHealth = 10;
+        damage = 1;
+        walkspeed = 1;
         resistance = 0;
-        active = true;
     }
 
     private void Start()
@@ -62,15 +60,26 @@ public class Enemy : MonoBehaviour
         canvas.gameObject.SetActive(false);
     }
 
-    private IEnumerator<WaitForSeconds> RepeatAttack()
+    private System.Collections.IEnumerator RepeatAttack()
     {
-        Tower t = target.GetComponent<Tower>();
-        DealDamage(t);
+        Tower tower = target.GetComponent<Tower>();
+        try
+        {
+            tower.TakeDamage(damage);
+        }
+        catch (MissingReferenceException)
+        {
+            StopCoroutine(attackRoutine);
+            target = null;
+            isMoving = true;
+        }
         while (true)
         {
             yield return new WaitForSeconds(1);
             try
-            { DealDamage(t); }
+            {
+                tower.TakeDamage(damage);
+            }
             catch (MissingReferenceException)
             {
                 StopCoroutine(attackRoutine);
@@ -91,26 +100,20 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void DealDamage(Tower tower)
-    {
-        if (damage * tower.Resistance >= tower.Health) tower.Death();
-        else tower.TakeDamage(damage);
-    }
-
     public void TakeDamage(float dmg)
     {
+        if (dmg * Resistance >= health)
+        {
+            Death();
+            return;
+        }
         health -= dmg * Resistance;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
     }
 
     public void Death()
     {
-        foreach (var i in gameObject.scene.GetRootGameObjects())
-            if (i.name == "EventSystem")
-            {
-                i.GetComponent<Money>().UpdateMoney(15);
-                break;
-            }
+        WaveSpawning.m.UpdateMoney(15);
         Destroy(gameObject);
     }
 }
