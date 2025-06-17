@@ -9,9 +9,9 @@ public class Bubble : MonoBehaviour
     {
         if (!xpGiven)
         {
-            XPManager.Instance.GiveXP(5); // Give XP
+            WaveSpawning.m.UpdateMoney(10);
             xpGiven = true;
-            Destroy(gameObject); // Remove the bubble
+            Destroy(gameObject);
         }
     }
 }
