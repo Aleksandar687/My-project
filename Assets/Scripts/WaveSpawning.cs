@@ -35,7 +35,9 @@ public class WaveSpawning : MonoBehaviour
         new byte[] { 1, 0, 1, 0, 1 },
         new byte[] { 0, 1, 1, 1, 0 }
     };
-    public GameObject enemyC;
+    public GameObject zombie;
+    public GameObject armored;
+    public GameObject boss;
     public GameObject label;
     public static Money m;
     public static bool[,] placedTowers = new bool[5, 9];
@@ -43,6 +45,12 @@ public class WaveSpawning : MonoBehaviour
     void Start()
     {
         m = gameObject.GetComponent<Money>();
+        StartCoroutine(Pause());
+    }
+
+    private System.Collections.IEnumerator Pause()
+    {
+        yield return new WaitForSeconds(4);
         spawnRoutine = StartCoroutine(SpawnSetWave());
     }
 
@@ -57,18 +65,31 @@ public class WaveSpawning : MonoBehaviour
                 break;
             }
             byte[] temp = setVariants[count];
-            m.UpdateMoney(count * 5);
             count++;
             label.GetComponent<TMP_Text>().text = "Wave " + count;
             for (int i = 0; i < 5; i++)
                 if (temp[i] == 1)
                 {
-                    GameObject instance = Instantiate(enemyC);
+                    GameObject instance = Instantiate(zombie);
                     instance.transform.position = new Vector3(8.5f, 1.26f, 0 - i);
-                    instance.name = "Zombie";
                     instance.AddComponent<Enemy>();
+                    instance.name = "Zombie";
                 }
-            yield return new WaitForSeconds(4);
+                else if (temp[i] == 2)
+                {
+                    GameObject instance = Instantiate(armored);
+                    instance.transform.position = new Vector3(8.5f, 1.26f, 0 - i);
+                    instance.AddComponent<Enemy>();
+                    instance.name = "Armored";
+                }
+                else if (temp[i] == 3)
+                {
+                    GameObject instance = Instantiate(boss);
+                    instance.transform.position = new Vector3(8.5f, 1.26f, 0 - i);
+                    instance.AddComponent<Enemy>();
+                    instance.name = "Boss";
+                }
+            yield return new WaitForSeconds(7);
         }
     }
 
@@ -80,12 +101,12 @@ public class WaveSpawning : MonoBehaviour
             for (int i = 0; i < 5; i++)
                 if (temp[i] == 1)
                 {
-                    GameObject instance = Instantiate(enemyC);
+                    GameObject instance = Instantiate(zombie);
                     instance.transform.position = new Vector3(8.5f, 1.26f, 0 - i);
                     instance.name = "Zombie";
                     instance.AddComponent<Enemy>();
                 }
-                yield return new WaitForSeconds(6);
+                yield return new WaitForSeconds(10);
         }
     }
 }

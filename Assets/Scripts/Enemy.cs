@@ -21,12 +21,34 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
-        health = 10;
-        maxHealth = 10;
-        damage = 1;
-        walkspeed = 1 + Random.Range(0, 0.01f);
+        switch (gameObject.name)
+        {
+            case "Zombie":
+                health = 20;
+                maxHealth = 20;
+                damage = 1;
+                walkspeed = 0.5f;
+                bubbleCount = 3;
+                break;
+            case "Armored":
+                health = 50;
+                maxHealth = 50;
+                damage = 2;
+                walkspeed = 0.35f;
+                bubbleCount = 5;
+                break;
+            case "Boss":
+                health = 1000;
+                maxHealth = 1000;
+                damage = 10;
+                walkspeed = 0.25f;
+                bubbleCount = 20;
+                break;
+            default:
+                break;
+        }
+        walkspeed += Random.Range(0, 0.01f);
         resistance = 0;
-        bubbleCount = 3;
         canvas = transform.Find("Canvas").gameObject;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
     }
@@ -114,6 +136,7 @@ public class Enemy : MonoBehaviour
             Vector3 randomOffset = Random.insideUnitSphere / 2;
             GameObject bub = Instantiate(WaveSpawning.m.bubblePrefab, transform.position + randomOffset, Quaternion.identity);
             bub.GetComponent<Rigidbody>().useGravity = true;
+            bub.AddComponent<Bubble>();
         }
         Destroy(gameObject);
     }

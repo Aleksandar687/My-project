@@ -2,15 +2,29 @@ using UnityEngine;
 
 public class Bubble : MonoBehaviour
 {
-    private bool xpGiven = false;
+    private bool claimed = false;
     
+    private void Start()
+    {
+        StartCoroutine(AutoClaim());
+    }
+
+    System.Collections.IEnumerator AutoClaim()
+    {
+        yield return new WaitForSeconds(4 + Random.Range(0, 1));
+        if (!claimed) Claim();
+    }
+
     public void OnMouseEnter()
     {
-        if (!xpGiven)
-        {
-            WaveSpawning.m.UpdateMoney(5);
-            xpGiven = true;
-            Destroy(gameObject);
-        }
+        if (!claimed)
+            Claim();
+    }
+
+    private void Claim()
+    {
+        WaveSpawning.m.UpdateMoney(5);
+        claimed = true;
+        Destroy(gameObject);
     }
 }

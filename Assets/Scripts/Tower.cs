@@ -110,12 +110,12 @@ public class Tower : MonoBehaviour
     System.Collections.IEnumerator MoveBullet()
     {
         Vector3 p = target.transform.position;
+        Destroy(tempBullet, 0.39f);
         while (Vector3.Distance(tempBullet.transform.position, p) > 0.1f)
         {
             tempBullet.transform.position = Vector3.MoveTowards(tempBullet.transform.position, p, 50 * Time.deltaTime);
             yield return null;
         }
-        Destroy(tempBullet);
     }
 
     public void TakeDamage(float dmg)
