@@ -5,6 +5,7 @@ public class Money : MonoBehaviour
 {
     public int cash = 100;
     public TMP_Text mText;
+    public GameObject bubblePrefab;
 
     public bool UpdateMoney(int amount)
     {

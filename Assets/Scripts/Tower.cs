@@ -21,18 +21,36 @@ public class Tower : MonoBehaviour
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
 
-    public Tower()
-    {
-        health = 10;
-        maxHealth = 10;
-        damage = 4;
-        attackSpeed = 0.7f;
-        range = 3;
-        resistance = 0;
-    }
-
     private void Start()
     {
+        switch (gameObject.name)
+        {
+            case "Sentry":
+                health = 5;
+                maxHealth = 5;
+                damage = 3;
+                attackSpeed = 0.9f;
+                range = 3;
+                break;
+            case "Sniper":
+                health = 3;
+                maxHealth = 3;
+                damage = 6;
+                attackSpeed = 1.6f;
+                range = 6;
+                break;
+            case "Rapidfire":
+                health = 8;
+                maxHealth = 8;
+                damage = 1.5f;
+                attackSpeed = 0.4f;
+                range = 2;
+                break;
+            default:
+                break;
+        }
+        resistance = 0;
+        attackSpeed += Random.Range(0, 0.01f);
         canvas = transform.Find("Canvas").gameObject;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
     }
@@ -70,22 +88,8 @@ public class Tower : MonoBehaviour
     private System.Collections.IEnumerator RepeatShoot()
     {
         Enemy enemy = target.GetComponent<Enemy>();
-        try
-        {
-            enemy.TakeDamage(damage);
-            tempBullet = Instantiate(gameObject.transform.Find("Top").Find("Bullet").gameObject);
-            tempBullet.transform.position = gameObject.transform.Find("Top").Find("Bullet").position;
-            StartCoroutine(MoveBullet());
-
-        }
-        catch (MissingReferenceException)
-        {
-            StopCoroutine(shootRoutine);
-            shooting = false;
-        }
         while (true)
         {
-            yield return new WaitForSeconds(attackSpeed);
             try
             {
                 enemy.TakeDamage(damage);
@@ -99,6 +103,7 @@ public class Tower : MonoBehaviour
                 shooting = false;
                 break;
             }
+            yield return new WaitForSeconds(attackSpeed);
         }
     }
 
@@ -122,17 +127,6 @@ public class Tower : MonoBehaviour
         }
         health -= dmg * Resistance;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
-    }
-
-    public void Death()
-    {
-        WaveSpawning.m.UpdateMoney(50);
-        foreach (var i in gameObject.scene.GetRootGameObjects())
-        {
-            if (i.name == "Zombie" && i.transform.position.z == transform.position.z)
-                i.GetComponent<Enemy>().Target = null;
-        }
-        Destroy(gameObject);
     }
 
     private void FindTarget()
@@ -160,5 +154,18 @@ public class Tower : MonoBehaviour
         direction.y = 0;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         top.rotation = Quaternion.Slerp(top.rotation, lookRotation, Time.deltaTime * 10);
+    }
+
+    public void Death()
+    {
+        int row = (int)-gameObject.transform.position.z;
+        int col = (int)gameObject.transform.position.x;
+        WaveSpawning.placedTowers[row, col] = false;
+        foreach (var i in gameObject.scene.GetRootGameObjects())
+        {
+            if (i.name == "Zombie" && i.transform.position.z == transform.position.z)
+                i.GetComponent<Enemy>().Target = null;
+        }
+        Destroy(gameObject);
     }
 }

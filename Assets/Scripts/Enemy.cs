@@ -13,24 +13,20 @@ public class Enemy : MonoBehaviour
     private Coroutine attackRoutine;
     private GameObject target = null;
     private GameObject canvas;
-     public GameObject bubblePrefab; 
-    public int bubbleCount = 10;
+    private int bubbleCount;
 
     public float Health { get => health; }
     public float Resistance { get => 1 - (float)resistance / 100; }
     public GameObject Target { set => target = value; }
 
-    public Enemy()
+    private void Start()
     {
         health = 10;
         maxHealth = 10;
         damage = 1;
-        walkspeed = 1;
+        walkspeed = 1 + Random.Range(0, 0.01f);
         resistance = 0;
-    }
-
-    private void Start()
-    {
+        bubbleCount = 3;
         canvas = transform.Find("Canvas").gameObject;
         canvas.transform.Find("Health").GetComponent<TMP_Text>().text = health + "/" + maxHealth;
     }
@@ -45,10 +41,8 @@ public class Enemy : MonoBehaviour
             target = null;
             isMoving = true;
         }
-
-        if (transform.position.x < 0)
+        if (transform.position.x < 0) //change later
             Death();
-
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
@@ -115,13 +109,12 @@ public class Enemy : MonoBehaviour
 
     public void Death()
     {
-        WaveSpawning.m.UpdateMoney(15);
-        Destroy(gameObject);
-         for (int i = 0; i < bubbleCount; i++)
+        for (int i = 0; i < bubbleCount; i++)
         {
-            // Spawn each bubble at a slightly random position around the zombie
-            Vector3 randomOffset = Random.insideUnitSphere * 2f;
-            Instantiate(bubblePrefab, transform.position + randomOffset, Quaternion.identity);
+            Vector3 randomOffset = Random.insideUnitSphere / 2;
+            GameObject bub = Instantiate(WaveSpawning.m.bubblePrefab, transform.position + randomOffset, Quaternion.identity);
+            bub.GetComponent<Rigidbody>().useGravity = true;
         }
+        Destroy(gameObject);
     }
 }

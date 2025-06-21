@@ -38,6 +38,7 @@ public class WaveSpawning : MonoBehaviour
     public GameObject enemyC;
     public GameObject label;
     public static Money m;
+    public static bool[,] placedTowers = new bool[5, 9];
 
     void Start()
     {
@@ -49,6 +50,12 @@ public class WaveSpawning : MonoBehaviour
     {
         while (true)
         {
+            if (count >= 20)
+            {
+                StopCoroutine(spawnRoutine);
+                spawnRoutine = StartCoroutine(SpawnRndWave());
+                break;
+            }
             byte[] temp = setVariants[count];
             m.UpdateMoney(count * 5);
             count++;
@@ -61,12 +68,7 @@ public class WaveSpawning : MonoBehaviour
                     instance.name = "Zombie";
                     instance.AddComponent<Enemy>();
                 }
-                if (count < 20) yield return new WaitForSeconds(4);
-                else
-                {
-                    StopCoroutine(spawnRoutine);
-                    spawnRoutine = StartCoroutine(SpawnRndWave());
-                }
+            yield return new WaitForSeconds(4);
         }
     }
 
